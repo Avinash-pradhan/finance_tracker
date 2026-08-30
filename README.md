@@ -1,262 +1,390 @@
 # 💰 Personal Finance Tracker
 
-A production-ready full-stack Django 4.x web application for tracking income, expenses, budgets, and financial analytics.
-
----
+A production-ready full-stack **Django 4.2** web application for tracking income, expenses, budgets, and financial analytics.
 
 ## ✨ Features
 
-| Module | Capabilities |
-|---|---|
-| **Auth** | Register · Login · Logout · Password change |
-| **Transactions** | Add · Edit · Delete · Filter by type/category/date/search · Pagination |
-| **Categories** | 15 predefined global categories + unlimited custom categories |
-| **Budgets** | Monthly budgets per category · Progress bars · 80%/100% email alerts |
-| **Analytics** | Google Charts: Pie (category spend) · Line (monthly trend) · Bar (weekly spend) |
-| **Exports** | CSV (all transactions) · PDF (monthly report via ReportLab) |
-| **Dashboard** | Income · Expense · Net balance · Budget progress · Recent transactions |
+| Module             | Capabilities                                                            |
+| ------------------ | ----------------------------------------------------------------------- |
+| **Authentication** | Register · Login · Logout · Password Change                             |
+| **Transactions**   | Add · Edit · Delete · Filter · Search · Pagination                      |
+| **Categories**     | 15 predefined global categories + unlimited custom categories           |
+| **Budgets**        | Monthly budgets per category · Progress tracking · Email alerts         |
+| **Analytics**      | Pie Chart · Monthly Trend · Weekly Spending                             |
+| **Exports**        | CSV export · PDF monthly reports                                        |
+| **Dashboard**      | Income · Expenses · Net Balance · Budget Progress · Recent Transactions |
+| **Admin Panel**    | Django Admin interface for managing application data                    |
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Backend**: Django 4.2, Python 3.11+
-- **Database**: SQLite3
-- **Frontend**: Bootstrap 5.3, Vanilla JS (ES6+)
-- **Charts**: Google Charts API
-- **Email**: Django SMTP (console backend for dev)
-- **PDF**: ReportLab 4.x
-- **CSV**: Python `csv` module
+* **Backend:** Django 4.2
+* **Language:** Python 3.11+
+* **Database:** PostgreSQL
+* **Frontend:** HTML5 · CSS3 · Bootstrap 5.3 · Vanilla JavaScript
+* **Charts:** Google Charts
+* **Email:** Django SMTP
+* **PDF:** ReportLab
+* **CSV:** Python `csv` module
+* **Configuration:** `python-decouple`
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Install dependencies
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Avinash-pradhan/finance_tracker.git
+cd finance_tracker
+```
+
+### 2. Create a Virtual Environment
+
+Windows:
+
+```powershell
+python -m venv venv
+venv\Scripts\activate
+```
+
+Linux/macOS:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Configure environment
+---
 
-```bash
-cp .env.example .env
-# Open .env and set:
-#   SECRET_KEY=<generate with: python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())">
-#   EMAIL_HOST_USER / EMAIL_HOST_PASSWORD  (or leave console backend for dev)
+## 🗄️ PostgreSQL Configuration
+
+This project uses **PostgreSQL** as its database.
+
+Make sure PostgreSQL is installed and running on your system.
+
+Create a database:
+
+```sql
+CREATE DATABASE django_db;
 ```
 
-### 3. Run migrations
+Create a `.env` file in the project root.
+
+Example:
+
+```env
+SECRET_KEY=your-secret-key
+
+DB_NAME=django_db
+DB_USER=postgres
+DB_PASSWORD=your-postgresql-password
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+> **Important:** Never commit `.env` to GitHub. It contains sensitive credentials.
+
+The project reads database credentials from environment variables instead of storing passwords directly in `settings.py`.
+
+---
+
+## ⚙️ Database Migration
+
+Run:
 
 ```bash
 python manage.py migrate
 ```
 
-This applies two migrations:
-- `0001_initial` — creates all tables with indexes & constraints
-- `0002_seed_predefined_categories` — inserts 15 global categories
+This creates the required Django and application database tables.
 
-### 4. (Optional) Load demo data
+---
 
-```bash
-python manage.py seed_demo
-# Creates user: demo / Demo@1234
-# Populates 3 months of sample transactions and budgets
-```
+## 👤 Create Superuser
 
-### 5. Create your own superuser
+Create an admin account:
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6. Start the server
+Then start the development server:
 
 ```bash
 python manage.py runserver
 ```
 
-Visit: http://127.0.0.1:8000
+Open:
 
----
-
-## 🗂 Project Structure
-
+```text
+http://127.0.0.1:8000/
 ```
-finance_tracker/
-├── manage.py
-├── requirements.txt
-├── .env.example
-│
-├── finance_tracker/          ← Django project package
-│   ├── settings.py           ← All configuration (uses python-decouple)
-│   ├── urls.py               ← Root URL router
-│   ├── wsgi.py / asgi.py
-│
-├── tracker/                  ← Main Django app
-│   ├── models.py             ← Category, Transaction, Budget
-│   ├── forms.py              ← All ModelForms + filter form
-│   ├── services.py           ← Business logic (summaries, chart data)
-│   ├── signals.py            ← post_save → budget alert emails
-│   ├── admin.py              ← Rich admin interface
-│   ├── apps.py               ← AppConfig (registers signals)
-│   ├── templatetags/
-│   │   └── finance_tags.py   ← currency, percentage, income_color filters
-│   ├── migrations/
-│   │   ├── 0001_initial.py
-│   │   └── 0002_seed_predefined_categories.py
-│   ├── views/
-│   │   ├── auth_views.py
-│   │   ├── dashboard_views.py
-│   │   ├── transaction_views.py
-│   │   ├── category_views.py
-│   │   ├── budget_views.py
-│   │   ├── chart_views.py     ← JSON endpoints for Google Charts
-│   │   ├── analytics_views.py
-│   │   └── export_views.py    ← CSV + PDF
-│   ├── urls/
-│   │   ├── auth_urls.py       ← /auth/…
-│   │   └── app_urls.py        ← /dashboard/, /transactions/, /api/…
-│   └── management/commands/
-│       └── seed_demo.py
-│
-├── templates/
-│   ├── base.html              ← Master layout (sidebar + topbar)
-│   ├── registration/          ← login, register, password_change
-│   └── email/                 ← budget_warning.html, budget_critical.html
-│
-├── tracker/templates/tracker/
-│   ├── dashboard.html
-│   ├── analytics.html         ← Google Charts page
-│   ├── transactions/          ← list, form, confirm_delete
-│   ├── categories/            ← list, form, confirm_delete
-│   └── budgets/               ← list, form, confirm_delete
-│
-└── static/
-    ├── css/main.css           ← Custom styles on Bootstrap 5
-    └── js/main.js             ← Sidebar, animations, UX helpers
+
+Admin panel:
+
+```text
+http://127.0.0.1:8000/admin/
 ```
 
 ---
 
-## 🔗 URL Map
+## 📊 Application Modules
 
-| URL | View | Description |
-|---|---|---|
-| `/` | Redirect | → `/dashboard/` |
-| `/auth/register/` | RegisterView | Create account |
-| `/auth/login/` | CustomLoginView | Sign in |
-| `/auth/logout/` | CustomLogoutView | Sign out |
-| `/dashboard/` | DashboardView | Main overview |
-| `/analytics/` | AnalyticsView | Google Charts page |
-| `/transactions/` | TransactionListView | Filtered paginated list |
-| `/transactions/add/` | TransactionCreateView | Add transaction |
-| `/transactions/<pk>/edit/` | TransactionUpdateView | Edit transaction |
-| `/transactions/<pk>/delete/` | TransactionDeleteView | Delete transaction |
-| `/categories/` | CategoryListView | List all categories |
-| `/budgets/` | BudgetListView | Current month budgets |
-| `/export/csv/` | ExportCSVView | Download all transactions |
-| `/export/pdf/` | ExportPDFView | Download monthly PDF report |
-| `/api/charts/category-spending/` | CategorySpendingAPIView | JSON for pie chart |
-| `/api/charts/monthly-trend/` | MonthlyTrendAPIView | JSON for line chart |
-| `/api/charts/weekly-spending/` | WeeklySpendingAPIView | JSON for bar chart |
-| `/admin/` | Django Admin | Admin panel |
+### Dashboard
+
+The dashboard provides an overview of:
+
+* Total income
+* Total expenses
+* Net balance
+* Current budget progress
+* Recent transactions
+
+### Transactions
+
+Users can:
+
+* Add income
+* Add expenses
+* Edit transactions
+* Delete transactions
+* Filter by type
+* Filter by category
+* Filter by date
+* Search transactions
+* Navigate through paginated results
+
+### Categories
+
+The application provides predefined categories along with support for custom user categories.
+
+### Budgets
+
+Users can create monthly budgets for categories and monitor spending progress.
+
+Budget alerts are triggered when spending reaches:
+
+* **80%** → Warning
+* **100%** → Critical
+
+### Analytics
+
+The application provides visual financial analytics using Google Charts:
+
+* Category spending — Pie Chart
+* Monthly income/expense — Line Chart
+* Weekly spending — Bar Chart
+
+### Exports
+
+Users can export financial data as:
+
+* CSV
+* PDF monthly report
 
 ---
 
-## ⚙️ Email Configuration
+## 📧 Email Configuration
 
-**Development** (default — prints to console):
+### Development
+
+For development, email can be printed directly to the terminal:
+
 ```env
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
 ```
 
-**Production** (Gmail example):
+### Production
+
+For Gmail SMTP:
+
 ```env
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password   # Use Gmail App Password, not main password
+EMAIL_HOST_PASSWORD=your-gmail-app-password
 DEFAULT_FROM_EMAIL=Finance Tracker <your-email@gmail.com>
 ```
 
-Budget alert emails fire automatically via Django signals when:
-- A transaction pushes category spending to **≥ 80%** of the budget → warning email
-- A transaction pushes category spending to **≥ 100%** of the budget → critical email
-
-Each alert is sent **once per budget period** (tracked via `warning_sent`/`critical_sent` flags).
+> Use a **Gmail App Password**, not your normal Gmail password.
 
 ---
 
-## 📊 Chart API Reference
+## 🗂️ Project Structure
 
-All endpoints require login (`@login_required`).
-
-**`GET /api/charts/category-spending/?month=M&year=Y`**
-```json
-{
-  "data": [["Category", "Amount"], ["Food & Dining", 4200.0], ["Transport", 1500.0]],
-  "status": "ok"
-}
+```text
+finance_tracker/
+│
+├── manage.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+├── README.md
+│
+├── finance_tracker/
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── tracker/
+│   ├── models.py
+│   ├── forms.py
+│   ├── services.py
+│   ├── signals.py
+│   ├── admin.py
+│   ├── apps.py
+│   │
+│   ├── migrations/
+│   │   ├── 0001_initial.py
+│   │   ├── 0002_seed_predefined_categories.py
+│   │   └── 0003_*.py
+│   │
+│   ├── views/
+│   │   ├── auth_views.py
+│   │   ├── dashboard_views.py
+│   │   ├── transaction_views.py
+│   │   ├── category_views.py
+│   │   ├── budget_views.py
+│   │   ├── chart_views.py
+│   │   ├── analytics_views.py
+│   │   └── export_views.py
+│   │
+│   ├── urls/
+│   │   ├── auth_urls.py
+│   │   └── app_urls.py
+│   │
+│   ├── templates/
+│   │   └── tracker/
+│   │
+│   └── management/
+│       └── commands/
+│
+├── templates/
+│   ├── base.html
+│   ├── registration/
+│   └── email/
+│
+└── static/
+    ├── css/
+    └── js/
 ```
 
-**`GET /api/charts/monthly-trend/?months=6`**
-```json
-{
-  "labels": ["Nov 24", "Dec 24", "Jan 25"],
-  "income":  [65000.0, 70000.0, 68000.0],
-  "expense": [28000.0, 35000.0, 29000.0],
-  "status": "ok"
-}
-```
+---
 
-**`GET /api/charts/weekly-spending/?weeks=8`**
-```json
-{
-  "data": [["Week Starting", "Expenses"], ["Apr 01", 3200.0], ["Apr 08", 4100.0]],
-  "status": "ok"
-}
-```
+## 🔗 URL Map
+
+| URL                              | Description            |
+| -------------------------------- | ---------------------- |
+| `/`                              | Redirects to Dashboard |
+| `/auth/register/`                | User Registration      |
+| `/auth/login/`                   | User Login             |
+| `/auth/logout/`                  | User Logout            |
+| `/dashboard/`                    | Main Dashboard         |
+| `/analytics/`                    | Financial Analytics    |
+| `/transactions/`                 | Transaction List       |
+| `/transactions/add/`             | Add Transaction        |
+| `/categories/`                   | Category Management    |
+| `/budgets/`                      | Budget Management      |
+| `/export/csv/`                   | CSV Export             |
+| `/export/pdf/`                   | PDF Export             |
+| `/api/charts/category-spending/` | Category Spending API  |
+| `/api/charts/monthly-trend/`     | Monthly Trend API      |
+| `/api/charts/weekly-spending/`   | Weekly Spending API    |
+| `/admin/`                        | Django Admin           |
+
+---
+
+## 🔒 Security
+
+The application follows common Django security practices:
+
+* Environment variables for sensitive configuration
+* PostgreSQL database
+* CSRF protection
+* Django password hashing
+* Login protection
+* User-specific data filtering
+* Permission checks for protected objects
+* `.env` excluded from Git
+* `db.sqlite3` excluded from Git
+* `__pycache__` excluded from Git
+* Secret credentials are not stored in source code
 
 ---
 
 ## 🧪 Testing Checklist
 
-After `python manage.py runserver`:
+After starting the server, verify:
 
-- [ ] Register a new account → redirected to dashboard
-- [ ] Login / Logout works
-- [ ] Add income transaction → balance increases
-- [ ] Add expense transaction → balance decreases
-- [ ] Filter transactions by type, category, date range, search
-- [ ] Create a budget → progress bar appears on dashboard
-- [ ] Add expense that crosses 80% → warning email in console
-- [ ] Add expense that crosses 100% → critical email in console
-- [ ] Analytics page loads all 3 Google Charts
-- [ ] Change month selector on analytics → pie chart refreshes
-- [ ] Download CSV → file opens in spreadsheet app
-- [ ] Download PDF → clean formatted report with tables
-- [ ] Admin panel at `/admin/` — verify all models visible
-- [ ] Mobile layout — sidebar collapses, hamburger appears
-- [ ] `python manage.py seed_demo` → demo/Demo@1234 works
+* [ ] User registration works
+* [ ] Login/logout works
+* [ ] Password change works
+* [ ] Income transaction works
+* [ ] Expense transaction works
+* [ ] Transaction editing works
+* [ ] Transaction deletion works
+* [ ] Search and filtering work
+* [ ] Pagination works
+* [ ] Categories work
+* [ ] Budgets work
+* [ ] 80% budget alert works
+* [ ] 100% budget alert works
+* [ ] Analytics charts load correctly
+* [ ] CSV export works
+* [ ] PDF export works
+* [ ] Admin panel works
+* [ ] Mobile layout works
+* [ ] PostgreSQL connection works
 
 ---
 
-## 🔒 Security Notes
+## 📌 Environment Variables
 
-- All views behind `LoginRequiredMixin` or `@login_required`
-- CSRF protection on all POST forms (`{% csrf_token %}`)
-- Users can only access their own data (queryset filtered by `user=request.user`)
-- `PermissionDenied` raised if user tries to edit/delete another user's data
-- Predefined categories are read-only (protected in view layer)
-- Passwords hashed with Django's default PBKDF2+SHA256
+The following configuration values should be stored in `.env`:
+
+```env
+SECRET_KEY=
+DB_NAME=
+DB_USER=
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+
+EMAIL_HOST=
+EMAIL_PORT=
+EMAIL_USE_TLS=
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+DEFAULT_FROM_EMAIL=
+```
+
+Never upload the actual `.env` file to GitHub.
 
 ---
 
 ## 📄 License
 
-MIT — free to use, modify, and distribute.
-# finance_tracker
+MIT License — free to use, modify, and distribute.
+
+---
+
+## 👨‍💻 Author
+
+**Avinash Pradhan**
+
+GitHub:
+https://github.com/Avinash-pradhan
+
+Project Repository:
+https://github.com/Avinash-pradhan/finance_tracker
